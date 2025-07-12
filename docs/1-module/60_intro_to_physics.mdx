@@ -165,30 +165,27 @@ Create a new Python file called `physics.py` in your repository for this section
 
 ### Problem 8
 
-An AUV is submerged in water.
-The AUV has a mass of $100 kg$ and a volume of $0.1 m^3$.
-The AUV is equipped with a thruster that can apply a force up to $100 N$.
-The thruster is located $0.5 m$ from the center of mass of the AUV.
-The thruster is oriented along the $x$-axis.
+An AUV is submerged in water in a 2D plane.
+This is a **top-down view** of the AUV - imagine looking down at the AUV from above as it moves along the **x-y plane**.
+The AUV is equipped with a thruster that is located $0.5 m$ behind the center of mass of the AUV.
+The thruster is oriented along the $x$-axis and can apply a force up to $100 N$.
 The thruster can rotate $30^\circ$ in either direction of the $x$-axis.
+The force from the thruster can contribute to both **linear acceleration** and **rotation (angular acceleration)** depending on its direction.
 
 ![AUV Configuration](./P8.jpg)
 
 1. Write a Python function, `calculate_auv_acceleration`,
-   that calculates the acceleration of the AUV in the 2D plane.
+   that calculates the linear acceleration of the AUV in the 2D plane.
 
 - The function should take the following arguments:
   - `F_magnitude`: the magnitude of force applied by the thruster in Newtons.
   - `F_angle`: the angle of the force applied by the thruster in radians.
     The angle is measured from the $x$-axis.
     Positive angles are measured in the counter-clockwise direction.
-  - `mass` (optional): the mass of the AUV in kilograms.
-    The default value is $100 kg$.
-  - `volume` (optional): the volume of the AUV in cubic meters.
-    The default value is $0.1 m^3$.
-  - `thruster_distance` (optional): the distance from the center of mass of the AUV to the thruster in meters.
-    The default value is $0.5 m$.
-- The function should return the acceleration of the AUV in meters per second squared.
+  - `mass` (can be set to default value of $100 kg$): the mass of the AUV in kilograms.
+  - `volume` (can be set to default value of $0.1 m^3$): the volume of the AUV in cubic meters.
+  - `thruster_distance` (can be set to default value of $0.5 m$): the distance from the center of mass of the AUV to the thruster in meters.
+- The function should return the linear acceleration of the AUV in meters per second squared.
 
 2. Write a Python function, `calculate_auv_angular_acceleration`,
    that calculates the angular acceleration of the AUV.
@@ -196,10 +193,8 @@ The thruster can rotate $30^\circ$ in either direction of the $x$-axis.
 - The function should take the following arguments:
   - `F_magnitude`: the magnitude of force applied by the thruster in Newtons.
   - `F_angle`: the angle of the force applied by the thruster in radians.
-  - `inertia` (optional): the moment of inertia of the AUV in $kg \cdot m^2$.
-    The default value is $1 kg \cdot m^2$.
-  - `thruster_distance` (optional): the distance from the center of mass of the AUV to the thruster in meters.
-    The default value is $0.5 m$.
+  - `inertia` (can be set to default value of $1 kg \cdot m^2$): the moment of inertia of the AUV in $kg \cdot m^2$.
+  - `thruster_distance` (can be set to default value of $0.5 m$): the distance from the center of mass of the AUV to the thruster in meters.
 - The function should return the angular acceleration of the AUV in radians per second squared.
 
 ### Problem 9
