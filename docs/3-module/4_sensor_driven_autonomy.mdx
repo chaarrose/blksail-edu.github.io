@@ -160,19 +160,24 @@ In this course, you will use a custom simulation for the BlueROV2. To install th
 git clone https://github.com/blksail-edu/gazebo_bluerov2
 ```
 
+Install the following dependencies:
+
 <Tabs groupId="operating-systems">
 <TabItem value="macos" label="macOS">
 
-Dr. Saad it is your time to shine !
+```zsh
+brew install gstreamer rapidjson opencv
+```
 
 </TabItem>
 <TabItem value="ubuntu" label="Ubuntu">
 
-Install the following dependencies:
-
 ```zsh
 sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev rapidjson-dev libopencv-dev
 ```
+
+</TabItem>
+</Tabs>
 
 Navigate to the `gazebo_bluerov2` repository, and then run the build command:
 
@@ -180,9 +185,6 @@ Navigate to the `gazebo_bluerov2` repository, and then run the build command:
 chmod +x ./build.sh
 ./build.sh
 ```
-
-</TabItem>
-</Tabs>
 
 ### Testing
 
