@@ -2,7 +2,7 @@
 sidebar_position: 40
 ---
 
-# Camera Calibration for AprilTag Pose Estimation
+# Camera Calibration and AprilTag Detection
 
 ## Purpose of Camera Calibration
 
@@ -16,10 +16,250 @@ Without calibration, pose estimation results (translation and rotation) could be
 
 ## What You Need
 
-- The camera mounted on the BlueROV2
-- A computer connected to the camera (via USB or IP stream)
-- A printed checkerboard calibration target as shown below (this one is 7×6 inner corners, 25 mm square size)
- ![Checkerboard](checkerboard_7x6_30mm.png)
+- The camera mounted on the BlueROV2 and streaming video
+- A computer or Raspberry Pi connected to the camera (e.g., via IP or USB)
+- ROS 2 workspace with a working camera publisher (e.g., `bluerov2_camera_interface`)
+- A printed checkerboard calibration target
+
+Our checkerboard has **7×6 inner corners** and **25 mm squares**.
+
+## Setup and Dependencies
+
+Make sure the following Python packages are installed:
+
+```bash
+pip install opencv-python opencv-contrib-python numpy
+```
+
+If you're using ROS 2 (Foxy or newer), make sure:
+
+- Your image topic is publishing (check with `ros2 topic echo /camera` or `/bluerov2/camera`)
+- Calibration images are saved in a folder (e.g., `calib_images/`)
+
+
+
+## Step 1: Capture Calibration Images
+
+Start your ROS 2 camera node and run the following image saver node to automatically save one image every 3 seconds:
+
+### `image_saver_node.py`
+
+```python
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+import os
+
+class ImageSaver(Node):
+    def __init__(self):
+        super().__init__('image_saver_node')
+        self.subscription = self.create_subscription(
+            Image,
+            'camera',  # Change this if your topic is different
+            self.listener_callback,
+            10
+        )
+        self.bridge = CvBridge()
+        self.frame_id = 0
+        self.output_dir = 'calib_images'
+        os.makedirs(self.output_dir, exist_ok=True)
+        self.save_image_flag = False
+        self.timer = self.create_timer(3.0, self.enable_image_saving)
+        self.get_logger().info('ImageSaver node started. Saving an image every 3 seconds.')
+
+    def enable_image_saving(self):
+        self.save_image_flag = True
+
+    def listener_callback(self, msg):
+        if not self.save_image_flag:
+            return
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        except Exception as e:
+            self.get_logger().error(f'Image conversion failed: {e}')
+            return
+        filename = os.path.join(self.output_dir, f'image_{self.frame_id:05d}.png')
+        cv2.imwrite(filename, cv_image)
+        self.get_logger().info(f'Saved: {filename}')
+        self.frame_id += 1
+        self.save_image_flag = False
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ImageSaver()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.try_shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+:::note 
+This node does not detect AprilTags, it only saves raw images for calibration.
+:::
+
+
+## Step 2: Calibrate the Camera
+
+Once you’ve saved about 15–20 images from different angles, run the following script to compute the camera matrix and distortion coefficients.
+
+### `calibrate_camera.py`
+
+```python
+import cv2
+import numpy as np
+import glob
+
+# 1. Prepare object points for calibration pattern
+pattern_size = (7, 6)  # (width, height) = (# inner corners)
+square_size = 0.025  # in meters
+
+objp = np.zeros((pattern_size[0] * pattern_size[1], 3), np.float32)
+objp[:, :2] = np.mgrid[0:pattern_size[0], 0:pattern_size[1]].T.reshape(-1, 2)
+objp *= square_size
+
+objpoints = []
+imgpoints = []
+
+# 2. Load images and find corners
+images = glob.glob('calib_images/*.png')
+for fname in images:
+    img = cv2.imread(fname)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, corners = cv2.findChessboardCorners(gray, pattern_size, None)
+    if not ret:
+        continue
+    corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1),
+                                criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001))
+    objpoints.append(objp)
+    imgpoints.append(corners2)
+
+# 3. Calibrate
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+
+# 4. Extract intrinsics
+fx = mtx[0, 0]
+fy = mtx[1, 1]
+cx = mtx[0, 2]
+cy = mtx[1, 2]
+
+print("RMS re-projection error:", ret)
+print(f"fx={fx:.2f}, fy={fy:.2f}, cx={cx:.2f}, cy={cy:.2f}")
+print("Camera matrix:\n", mtx)
+print("Distortion coefficients:\n", dist)
+```
+
+
+
+## Step 3: Undistort Images
+
+Use the calibration results to undistort your images before detection:
+
+```python
+import cv2
+
+# Load the image previously used 
+img = cv2.imread("test_image.png")
+
+# Get optimal new camera matrix
+h, w = img.shape[:2]
+new_K, _ = cv2.getOptimalNewCameraMatrix(K, D, (w, h), 1, (w, h))
+
+# Undistort the image
+undistorted = cv2.undistort(img, K, D, None, new_K)
+```
+
+
+
+## Step 4: Run AprilTag Detection with Intrinsics
+
+Make sure you have installed the AprilTag Python package:
+
+```bash
+pip install dt-apriltags
+```
+
+Then run detection:
+
+```python
+from dt_apriltags import Detector
+import cv2
+
+# Initialize detector
+detector = Detector(families='tag36h11')
+
+# Convert to grayscale
+gray = cv2.cvtColor(undistorted, cv2.COLOR_BGR2GRAY)
+
+# Camera intrinsics for pose estimation
+fx = K[0, 0]
+fy = K[1, 1]
+cx = K[0, 2]
+cy = K[1, 2]
+
+# Run detection 
+tags = detector.detect(
+   gray,
+   estimate_tag_pose=True,
+   camera_params=(fx, fy, cx, cy),
+   tag_size=0.05  # in meters
+)
+```
+
+:::tip
+Adjust the `tag_size` parameter to match the actual size of your printed AprilTag (the black square), in **meters**.
+:::
+
+
+
+
+## Print or Use the Detection Results
+
+```python
+for tag in tags:
+    print(f"Detected tag ID: {tag.tag_id}")
+    print("Translation (t):", tag.pose_t.flatten())
+    print("Rotation matrix (R):\n", tag.pose_R)
+```
+
+This gives you the full 6DOF pose (6 Degrees of Freedom), including:
+
+- 3D Position: X (left/right), Y (up/down), Z (forward/back)
+- 3D Orientation: Roll, Pitch, Yaw (rotation around each axis)
+
+
+
+## Conclusion
+
+The pose returned by the AprilTag detector (`pose_t` and `pose_R`) gives the position and orientation of the tag relative to the camera. This information can be used for:
+
+- Real-time localization of the ROV
+- Station-keeping near a tag
+- Navigation relative to visual landmarks
+- Sensor fusion with IMU or depth sensors
+
+:::info
+The camera calibration step is essential for **accurate pose estimation**. The values `fx`, `fy`, `cx`, and `cy` from the calibration script must be passed to the AprilTag detector as `camera_params`. Without them, the detector can still find tags but cannot estimate pose reliably.
+:::
+
+
+
+
+
+
+
+
+
+
+
+<!-- Draft section, ROS not working
 
 ## ROS 2–Based Camera Calibration
 
@@ -183,7 +423,7 @@ Without calibration, pose estimation results (translation and rotation) could be
       gray,
       estimate_tag_pose=True,
       camera_params=(fx, fy, cx, cy),
-      tag_size=0.1 # in meters
+      tag_size=0.05 # in meters
    )
    ```
    :::warning
@@ -227,102 +467,11 @@ Without calibration, pose estimation results (translation and rotation) could be
       gray,
       estimate_tag_pose=True,
       camera_params=(fx, fy, cx, cy),
-      tag_size=0.1  # in meters
+      tag_size=0.05  # in meters
    )
    ```
 
    These parameters define the camera’s focal lengths and optical center, which the detector uses to correctly map the 2D tag corners in the image to a 3D pose in space.
    Without them, the detector can still find tags, but it cannot calculate the pose relative to the camera; which is critical for localization and control.
-
-
-
-
-
-
-
-
-
-<!-- Draft section, Not complete
-
-## Option 2: OpenCV-Based Camera Calibration (No ROS) 
-
-### Prerequisites
-
-- Python 3 with OpenCV installed 
-
-```
-pip install opencv-python
-```
-- Camera accessible via `/dev/video*`, USB, or IP stream
-- Same printed checkerboard pattern used above
-
-### Python Calibration Script
-
-```python
-import cv2
-import numpy as np
-
-CHECKERBOARD = (7, 6)
-square_size = 0.025  # meters
-
-objp = np.zeros((CHECKERBOARD[0]*CHECKERBOARD[1], 3), np.float32)
-objp[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
-objp *= square_size
-
-objpoints = []
-imgpoints = []
-
-cap = cv2.VideoCapture(0)  # Adjust to match your camera
-
-print("[INFO] Press 's' to save frame, 'q' to quit...")
-
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cv2.imshow("Calibration", frame)
-
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('s'):
-        ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, None)
-        if ret:
-            objpoints.append(objp)
-            imgpoints.append(corners)
-            cv2.drawChessboardCorners(frame, CHECKERBOARD, corners, ret)
-            print("[INFO] Frame saved.")
-        else:
-            print("[WARN] Checkerboard not detected.")
-    elif key == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
-
-ret, K, D, R, T = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-
-print("Camera matrix (K):\n", K)
-print("Distortion coefficients (D):\n", D)
-
-np.savez("blue_rov_camera_calib.npz", K=K, D=D, R=R, T=T)
-```
-
-### Using the Calibration Output
-
-You can load this file in any OpenCV or AprilTag-based pipeline:
-
-```python
-calib = np.load("blue_rov_camera_calib.npz")
-K = calib["K"]
-D = calib["D"]
-```
-
-You can then undistort images using:
-
-```python
-undistorted = cv2.undistort(image, K, D)
-```
-
-Or pass the calibration directly to a pose estimation function (such as in OpenCV’s ArUco or AprilTag libraries).
 
 -->
