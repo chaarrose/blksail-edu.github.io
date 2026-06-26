@@ -1,41 +1,51 @@
-# Website
+# BLKSAIL AUVC Course Site
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+This repository contains the documentation and announcement site for the MIT Beaver Works Summer Institute Autonomous Underwater Vehicle Challenge (AUVC), maintained by BLKSAIL.
 
-### Installation
+The site includes:
+- the current course materials
+- archived versioned course content for prior years
+- program announcements published through the blog
 
-```
-$ yarn
-```
+## Stack
 
-### Local Development
+- Docusaurus 3
+- React 19
+- Yarn 4
+- Node 22
 
-```
-$ yarn start
-```
+## Install
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
+```bash
+corepack enable
+yarn install
 ```
 
-Not using SSH:
+## Local Development
 
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
+```bash
+yarn start
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+This starts the local Docusaurus dev server with live reload.
+
+## Build
+
+```bash
+yarn build
+```
+
+The production site is generated into `build/`.
+
+## Type Check
+
+```bash
+yarn typecheck
+```
+
+## Content Layout
+
+- `docs/`: current course content
+- `versioned_docs/`: archived yearly course material
+- `blog/`: announcements and updates
+- `static/`: static assets served as-is
