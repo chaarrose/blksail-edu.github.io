@@ -1,0 +1,473 @@
+---
+sidebar_position: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import Image from "@theme/IdealImage";
+
+# 3.3 Sensor-Driven Autonomy
+
+## Gazebo
+
+[Gazebo](https://gazebosim.org/) is a set of open source tools for simulating robots in an environment.
+It is commonly used in robotics research and education.
+
+We will be using Gazebo to simulate the BlueROV2 robot in a virtual pool environment.
+
+:::note
+
+We will be using `Gazebo Harmonic`, the latest LTS version of Gazebo.
+
+:::
+
+### Installation
+
+The documentation for installing Gazebo can be found [here](https://gazebosim.org/docs/garden/install).
+See "**Binary Installation**" for instructions on installing Gazebo on your operating system.
+Below is a summary of the steps.
+
+:::note
+
+Only Ubuntu is fully supported by Gazebo, and macOS is partially supported.
+On Windows the simulation will run in the WSL environment.
+
+:::
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
+
+First we need to install ruby from Homebrew:
+
+```bash
+brew install ruby
+```
+
+Then we have to add the Homebrew Ruby to our path:
+
+```bash
+echo 'export PATH="$(brew --prefix)/opt/ruby/bin:$PATH"' >> ~/.zshrc
+```
+
+Now, we add the `osrf/simulation` tap:
+
+```bash
+brew tap osrf/simulation
+```
+
+:::tip Apple Silicon-based Macs
+
+For Apple Silicon-based Macs, we need to modify the Formulae before installing Gazebo.
+
+```bash
+cd /opt/homebrew/Library/Taps/osrf/homebrew-simulation/Formula
+sed -i '' 's|cmake_args << "-DCMAKE_INSTALL_RPATH=#{rpath}"|cmake_args << "-DCMAKE_INSTALL_RPATH=#{rpath};/opt/homebrew/lib"|' *.rb
+```
+
+:::
+
+Next we install Gazebo:
+
+```bash
+brew install gz-harmonic
+```
+
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+
+First, **in a WSL terminal**, update and install dependencies:
+
+```bash
+sudo apt update
+sudo apt install lsb-release wget gnupg
+```
+
+Next, install the Gazebo package repository:
+
+```bash
+sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+```
+
+Finally, install `Gazebo Harmonic`:
+
+```bash
+sudo apt update
+sudo apt install gz-harmonic
+```
+
+</TabItem>
+</Tabs>
+
+### Testing
+
+To test your installation, run the following command:
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
+
+In one terminal, run:
+
+```bash
+gz sim -v4 -s shapes.sdf
+```
+
+In another terminal, run:
+
+```bash
+gz sim -v4 -g
+```
+
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+
+In one terminal, run:
+
+```bash
+gz sim -v4 shapes.sdf
+```
+
+You should see a window pop up with some 3D objects in it.
+
+:::info
+
+For **`WSL`** users, hardware acceleration (GPU) may not work properly inside of the virtual environment. If your simulation seems laggy, you can try switching to software acceleration (CPU).
+
+To do so, add the following line to your `WSL`'s `.zshrc` file:
+
+```zsh
+export LIBGL_ALWAYS_SOFTWARE=1
+```
+
+Then, source `.zshrc` in your `WSL` terminal and restart the simulation.
+
+```zsh
+source ~/.zshrc
+```
+
+:::
+
+</TabItem>
+</Tabs>
+
+## BlueROV2 Simulation
+
+### Installation
+
+In this course, you will use a custom simulation for the BlueROV2. To install the simulation, **clone the repository onto your macOs, Windows WSL, or Ubuntu machine**:
+
+```zsh
+git clone https://github.com/blksail-edu/gazebo_bluerov2
+```
+
+Install the following dependencies:
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
+
+```zsh
+brew install gstreamer rapidjson opencv
+```
+
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+
+```zsh
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev rapidjson-dev libopencv-dev
+```
+
+</TabItem>
+</Tabs>
+
+Navigate to the `gazebo_bluerov2` repository, and then run the build command:
+
+```zsh
+chmod +x ./build.sh
+./build.sh
+```
+
+### Testing
+
+After the build is complete, you can start the simulation with:
+
+```zsh
+chmod +x ./launch_1x_bluerov2.sh
+./launch_1x_bluerov2.sh
+```
+
+:::info
+
+The `./` in the command is the relative path to the `build.sh` and `launch.sh` files. As is, the above commands only run if your working directory is the `gaebo_bluerov2` directory.
+
+This command **MUST** be run from inside the `/gazebo_bluerov2` directory.
+:::
+
+### Environment Setup
+
+Now that you can run the BlueROV2 Gazebo simulation, the Gazebo simulation must be bridged with ROS 2.
+
+#### Raspberry Pi Configuration
+
+In a terminal on the `backseat`, install the `ros_gz_bridge` package. First, add the Gazebo package repository:
+
+```zsh
+sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+```
+
+Then install the bridge and some dependencies:
+
+```zsh
+sudo apt update
+sudo apt install ros-jazzy-ros-gz ros-jazzy-ros-gz-bridge libgz-transport13-dev libgz-msgs10-dev libgz-common5-dev libgz-tools2-dev
+sudo apt upgrade -y
+```
+
+Then, with your favorite text editor, open the `.zshrc` file and add the following lines:
+
+```zsh
+# Gazebo
+export GZ_PARTITION=my_sim
+export GZ_TRANSPORT_IP=192.168.3.2
+export GZ_TRANSPORT_PUB_PORT=11345
+export GZ_TRANSPORT_SUB_PORT=11346
+export GZ_DISCOVERY_SERVER=192.168.3.1:11345
+```
+
+These environment variables will help point the Raspberry Pi to the Gazebo simulation.
+
+Source the `.zshrc` file:
+
+```zsh
+source ~/.zshrc
+```
+
+#### Laptop Configuration
+
+:::warning
+
+If you are using **Windows and WSL**, then for this section only, follow the Windows tab rather than the Ubuntu tab.
+
+:::
+
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
+
+:::danger
+
+Dr. Saad part two, electric boogaloo !
+
+:::
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+You must add similar environment variables to your `WSL`'s `.zshrc` file so that Raspberry Pi and Gazebo simulation can communicate. With your favorite text editor, open the `.zshrc` file in `WSL` and add the following lines:
+
+```zsh
+# Gazebo
+export GZ_PARTITION=my_sim
+export GZ_TRANSPORT_ID=192.168.3.1
+export GZ_TRANSPORT_PUB_PORT=11345
+export GZ_TRANSPORT_SUB_PORT=11346
+```
+
+After, source the `.zshrc` file:
+
+```zsh
+source ~/.zshrc
+```
+
+This alone is not enough to enable Gazebo communication between your Raspberry Pi and WSL.
+
+##### WSL Network Mode
+
+Since WSL is a virtual machine, it is by default an internal network interface, meaning that the WSL interface is only visible to Windows. To fix this, you can change WSL's network mode to mirrored.
+
+In a **`Windows PowerShell`** terminal, open the `.wslconfig file`:
+
+```zsh
+cd
+notepad .wslconfig
+```
+
+:::note
+
+If it says that the file does not exist, please click yes to create a new file.
+
+:::
+
+Insert the following lines to change WSL to have a `mirror` network mode, then save and close the file.
+
+```zsh
+[wsl2]
+networkingMode=mirrored
+```
+
+To apply the changes, shutdown `WSL` from a **`Windows PowerShell`** terminal:
+
+:::warning
+
+This will close all running `WSL` terminals in your system.
+
+:::
+
+```zsh
+wsl --shutdown
+```
+
+After the shutdown, you can open `WSL` again as normal and the changes will be applied. However, you are still not done.
+
+##### WSL Firewall Access
+
+Create a new Windows Firewall protocol to enable IPv4 communication between WSL and your Raspberry Pi. In a **`Windows PowerShell`** terminal, run:
+
+```zsh
+New-NetFirewallRule -DisplayName "AUVC Allow ICMPv4 Inbound for WSL2" -Direction Inbound -Protocol ICMPv4 -Action Allow
+```
+
+You can test that this works by pinging your Raspberry Pi. In a **`WSL`** terminal, run:
+
+```zsh
+ping 192.168.3.2
+```
+
+Then, create four additional Windows Firewall protocols to allow access to the Gazebo ports. Run the following commands in a **`Windows PowerShell`** terminal:
+
+```zsh
+New-NetFirewallRule -DisplayName "AUVC Allow Gazebo UDP Ports Inbound for WSL2" -Direction Inbound -Protocol UDP -LocalPort 9000-9100,10317-10318,11345-11355 -Action Allow
+```
+
+```zsh
+New-NetFirewallRule -DisplayName "AUVC Allow Gazebo UDP Ports Outbound for WSL2" -Direction Outbound -Protocol UDP -RemotePort 9000-9100,10317-10318,11345-11355 -Action Allow
+```
+
+```zsh
+New-NetFirewallRule -DisplayName "AUVC Allow Gazebo TCP Ports Inbound for WSL2" -Direction Inbound -Protocol TCP -LocalPort 40000-65535 -Action Allow
+```
+
+```zsh
+New-NetFirewallRule -DisplayName "AUVC Allow Gazebo TCP Ports Outbound for WSL2" -Direction Outbound -Protocol TCP -RemotePort 40000-65535 -Action Allow
+```
+
+You can test that this is working by running the Gazebo `./launch_1x_bluerov2.sh` simulation in a `WSL` terminal, and then running the following command from your Raspberry Pi:
+
+```zsh
+gz topic -l
+```
+
+You should see a list of Gazebo topics in your terminal on the `backseat` from the Gazebo simulation running in `WSL`.
+
+In the same terminal on the `backseat`, try:
+
+```zsh
+gz topic -e -t /world/bluerov2_pool_sim/model/rov1/link/base_link/sensor/imu_sensor/imu
+```
+
+You should see imu messages output in the terminal.
+
+
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+
+placeholder
+
+</TabItem>
+</Tabs>
+
+## ROS 2 Gazebo Bridge
+
+To communicate with the BlueROV2 simulation, you will use the `ros_gz_bridge` package. The `rosmav` package contains a launch file that is already configured for both our single-rov and double-rov simulations.
+
+:::warning
+
+The bridge node should be started after the Gazebo simulations to ensure it functions properly.
+
+:::
+
+This node will convert Gazebo messages to ROS 2 messages for crucial onboard components like the camera, IMU, magnetometer/compass. It is also configured for thruster manual inputs; however, we **WILL NOT** be using these to control the ROV(s).
+
+:::info
+
+You will start the bridge in the `simulation.launch.py` ROS 2 launch file in the following section.
+
+:::
+
+## ROS 2 Simulation Interface
+
+To control the BlueROV2 vehicle(s) in the Gazebo simulations, you will use the simulation interface in the `rosmav` package. The simulation interface publishes topics identical to those from the hardware interface using a custom node paired with the `ros_gz_bridge` package.
+
+First, **start the simulation on your macOs, Windows WSL, or Ubuntu machine**:
+
+:::info
+
+If you want to start a simulation with **1x BlueROV2**, run:
+
+```zsh
+./launch_1x_bluerov2.sh
+```
+
+If you want to start a simulation with **2x BlueROV2**, run:
+
+```zsh
+./launch_2x_bluerov2.sh
+```
+
+:::
+
+Then, on the `backseat`, launch the simulation interface and bridge nodes:
+
+```zsh
+ros2 launch rosmav simulation.launch.py
+```
+
+If all things are working correctly, several topics will be advertised with the `rov1` and `rov2` namespaces that correspond to the same topics from the `bluerov2_hardware_interface` node.
+
+:::note
+
+Topics will be advertised for both ROVs in the simulation interface regardless of whether you are simulating 1x or 2x vehicles.
+
+If you are only simulating 1x vehicle, ignore the `rov2` topics.
+
+:::
+
+:::info
+
+For the simulation, you do not need to arm the ROVs to publish `ManualControl` messages.
+
+:::
+
+## Problem Set
+
+Create a new package that will contain nodes to run with the Gazebo simulations.
+
+### Problem One
+
+Create a new node that deploys your line-following logic with `rov1` in the `./launch_1x_bluerov2` simulation. Publish control messages to the `/rov1/manual_control` topic.
+
+:::info
+
+If you do not want to publish all the `x`, `y`, `z`, and `r` in a single `ManualControl` msg, you can replace any of the fields with `nan`. In this case, the software interface will use the previous value for that field.
+
+:::
+
+:::warning Check-off
+Review with a TA or instructor to check-off this section.
+:::
+
+### Problem Two
+
+Create a launch file that deploys two instances of your control logic for both `rov1` and `rov2`. Please specify the ROV names as namespaces in your launch file.
+
+Then, test your code using the `./launch_2x_bluerov2` simulation and `ros2 launch rosmav simulation.launch.py`.
+
+:::note
+
+This simulation can be used to test your strategy for the final challenge.
+
+:::
+
+:::warning Check-off
+Review with a TA or instructor to check-off this section.
+:::
+
