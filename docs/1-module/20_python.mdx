@@ -13,32 +13,14 @@ It is very useful to have a basic understanding of Python before starting the co
 
 ## Virtual Environments
 
-To avoid conflicts between different Python projects, it is a good idea to use
-virtual environments. A virtual environment is a directory tree which contains
-Python executable files and other files which indicate that it is a virtual
-environment.
-
-### Install
-Before we can install any packages on the RPi, we have to make sure that pip is installed, same as we did with your local machine.
-We can do that with the following command:
-
-```bash
-sudo apt install python3-pip
-```
-
-Let's install the `virtualenv` package and `virtualenvwrapper` extension for
-Python.
-
-```bash
-pip3 install --user virtualenv virtualenvwrapper --break-system-packages
-```
+To avoid conflicts between different Python projects, it is a good idea to use virtual environments.
+A virtual environment is a directory tree which contains Python executable files and other files which indicate that it is a virtual environment.
 
 ### Augmenting our `.zshrc` with `virtualenvwrapper`
 
 We will be adding some configuration to the `.zshrc` file.
 
-Open the `.zshrc` file with your favorite text editor and add the following
-lines:
+Open the `.zshrc` file with your favorite text editor and add the following lines:
 
 ```bash
 # Python
@@ -50,23 +32,9 @@ source virtualenvwrapper.sh
 
 ## Jupyter
 
-[Jupyter Notebook](https://jupyter.org/) is an open-source web application that
-allows you to create and share documents that contain live code, equations,
-visualizations and narrative text.
+[Jupyter Notebook](https://jupyter.org/) is an open-source web application that allows you to create and share documents that contain live code, equations, visualizations and narrative text.
 
 We will be using Jupyter Notebook to write some assignments.
-
-### Install
-
-```bash
-pip3 install jupyter --break-system-packages
-```
-
-:::danger
-
-From this point forward, **DO NOT** use the `--break-system-packages` argument when installing python libraries.
-
-:::
 
 ## Let's get started
 
