@@ -43,6 +43,8 @@ Check that the driver was installed by opening a terminal and running the follow
 
 ```bash
 ping backseat.local
+# or, if the above command does not work, try the following command:
+ping 192.168.3.2
 ```
 
 :::
@@ -60,7 +62,7 @@ We will be using Visual Studio Code to connect to the RPi.
 6. Enter the following command in the input field:
 
 ```bash
-ssh blue@backseat.local
+ssh blue@backseat.local   # again, if backseat.local does not work, try 192.168.3.2
 ```
 
 The default password is `iamblue`.
@@ -210,104 +212,6 @@ You can edit the `.zshrc` file with your favorite text editor.
 
 We will be adding some configuration to the `.zshrc` file in the next sections.
 
-## Assigning the RPi a Static IP on your Local Machine
-
-### Local Machine
-
-:::warning
-
-If you are using **Windows and WSL**, then for this section only, follow the Windows tab rather than the Ubuntu tab.
-
-:::
-
-<Tabs groupId="operating-systems">
-<TabItem value="macos" label="macOS">
-
-Open `System Settings > Network`.
-
-Select the network interface for the Raspberry Pi (likely called `RNDIS/Ethernet Gadget`).
-
-:::info
-
-If you are unsure which interface this is, disconnect the RPi from your laptop.
-This will remove the interface from the list.
-Reconnect the RPi to your laptop and the interface should appear again.
-
-:::
-
-With the correct interface selected, click **`Details...`**.
-
-Under the **`TCP/IP`** tab, set the **`Configure IPv4`** dropdown to **`Manually`**.
-
-Enter the following
-- **`IPv4 Address`** : `192.168.3.1`
-- **`Subnet Mask`**: `255.255.255.0`
-
-Click `OK` to save the settings.
-
-</TabItem>
-<TabItem value="windows" label="Windows">
-
-Open **`Network Connections`**. Find the network interface for the Raspberry Pi.
-
-:::info
-
-This interface should appear as **`USB Ethernet/RNDIS Gadget`**.
-
-If you are unsure which interface this is, disconnect the RPi from your laptop.
-This will remove the interface from the list. Reconnect the RPi to your laptop and the interface should appear again.
-
-:::
-
-Right click on the interface and choose **`Properties`**.
-
-Select **`Internal Protocol Version 4 (TCP/IPv4)`** and click **`Properties`**.
-
-Choose **`Use the following IP address`** and enter the following:
-
-
-- **`IPv4 Address`** : `192.168.3.1`
-- **`Subnet Mask`**: `255.255.255.0`
-
-Click `OK`, then close to apply the settings.
-
-</TabItem>
-<TabItem value="ubuntu" label="Ubuntu">
-
-Open **`Settings`** -> **`Network`**.
-
-Select the interface connected to your Raspberry Pi.
-
-:::info
-
-If you are unsure which interface this is, disconnect the RPi from your laptop.
-This will remove the interface from the list. Reconnect the RPi to your laptop and the interface should appear again.
-
-:::
-
-Click the settings gear icon next to the itnerface.
-
-Go to the **`IPv4 tab`** and set the **`IPv4 Method`** to **`Manual`**.
-
-Click **`Add`** and enter:
-
-
-- **`IPv4 Address`** : `192.168.3.1`
-- **`Subnet Mask`**: `255.255.255.0`
-
-Click `Apply` and reconnect the interface if needed.
-
-</TabItem>
-</Tabs>
-
-#### Testing
-
-Once these steps are complete, you should be able to run `ping 192.168.3.1` from a terminal on the `Raspberry Pi`.
-
-:::danger
-Make sure you always use the same USB port that the RPi was plugged in when you set the IP address, as that is the specific interface that is now setup. 
-If you use another USB port, it will reset your interface settings. 
-:::
 
 :::warning
 

@@ -284,7 +284,7 @@ Let's install the `virtualenv` package and `virtualenvwrapper` extension for
 Python.
 
 ```bash
-pip3 install --user virtualenv virtualenvwrapper --break-system-packages
+pip3 install --user virtualenv virtualenvwrapper
 ```
 
 #### `.zshrc`
@@ -293,7 +293,7 @@ We will be adding some configuration to the `.zshrc` file.
 
 Open the `.zshrc` file using your preferred text editor.
 
-:::note 
+:::note
 
 If this is your first time editing the file, you have a couple of options:
 
@@ -311,9 +311,10 @@ If this is your first time editing the file, you have a couple of options:
   code ~/.zshrc
   ```
 
-  > **Note:** If the `code` command is not recognized, you may need to enable it by following the instructions for your operating system or installation method.
-
+  :::note
+  If the `code` command is not recognized in your terminal, you can enable it by opening Visual Studio Code, pressing **Cmd + Shift + P** (on macOS) or **Ctrl + Shift + P** (on Windows/Linux), typing `Shell Command: Install 'code' command in PATH`, and pressing **Enter**.
 :::
+
 
 Once the `.zshrc` file is open, add the following lines at the end:
 
@@ -325,19 +326,94 @@ export PATH=$PATH:$HOME/.local/bin
 source virtualenvwrapper.sh
 ```
 
-### Jupyter
+## Assigning a Static IP for your Local Machine to connect to the Raspberry Pi
 
-[Jupyter Notebook](https://jupyter.org/) is an open-source web application that
-allows you to create and share documents that contain live code, equations,
-visualizations and narrative text.
+:::warning
 
-We will be using Jupyter Notebook to write some assignments.
+If you are using **Windows and WSL**, then for this section only, follow the Windows tab rather than the Ubuntu tab.
 
-#### Install
+:::
 
-```bash
-pip3 install jupyter --break-system-packages
-```
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
+
+Open `System Settings > Network`.
+
+Select the network interface for the Raspberry Pi (likely called `RNDIS/Ethernet Gadget`).
+
+:::info
+
+If you are unsure which interface this is, disconnect the RPi from your laptop.
+This will remove the interface from the list.
+Reconnect the RPi to your laptop and the interface should appear again.
+
+:::
+
+With the correct interface selected, click **`Details...`**.
+
+Under the **`TCP/IP`** tab, set the **`Configure IPv4`** dropdown to **`Manually`**.
+
+Enter the following
+- **`IPv4 Address`** : `192.168.3.1`
+- **`Subnet Mask`**: `255.255.255.0`
+
+Click `OK` to save the settings.
+
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+
+Open **`Settings`** -> **`Network`**.
+
+Select the interface connected to your Raspberry Pi.
+
+:::info
+
+If you are unsure which interface this is, disconnect the RPi from your laptop.
+This will remove the interface from the list. Reconnect the RPi to your laptop and the interface should appear again.
+
+:::
+
+Click the settings gear icon next to the itnerface.
+
+Go to the **`IPv4 tab`** and set the **`IPv4 Method`** to **`Manual`**.
+
+Click **`Add`** and enter:
+
+
+- **`IPv4 Address`** : `192.168.3.1`
+- **`Subnet Mask`**: `255.255.255.0`
+
+Click `Apply` and reconnect the interface if needed.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+Open **`Network Connections`**. Find the network interface for the Raspberry Pi.
+
+:::info
+
+This interface should appear as **`USB Ethernet/RNDIS Gadget`**.
+
+If you are unsure which interface this is, disconnect the RPi from your laptop.
+This will remove the interface from the list. Reconnect the RPi to your laptop and the interface should appear again.
+
+:::
+
+Right click on the interface and choose **`Properties`**.
+
+Select **`Internal Protocol Version 4 (TCP/IPv4)`** and click **`Properties`**.
+
+Choose **`Use the following IP address`** and enter the following:
+
+
+- **`IPv4 Address`** : `192.168.3.1`
+- **`Subnet Mask`**: `255.255.255.0`
+
+Click `OK`, then close to apply the settings.
+
+</TabItem>
+</Tabs>
+
 
 ## QGroundControl Installation and Setup
 
@@ -445,7 +521,7 @@ Make sure that you have already **installed** and **launched** QGroundControl be
 </TabItem>
 </Tabs>
 
-### Connecting the BlueROV2 to QGroundControl 
+### Connecting the BlueROV2 to QGroundControl
 
 1. When the BlueROV2 is connected to your Linkbox and powered on, start the QGroundControl application.
 2. Wait a few seconds for the ROV to auto-connect and for the green parameters bar to finish loading from left to right.
