@@ -8,7 +8,7 @@ To connect your Raspberry Pi to the internet, you will need to modify the `50-cl
 Open a terminal on the `backseat` and open the file:
 
 ```zsh
-sudo nano /etc/netplan/50-cloud-init.yaml
+sudo nano /etc/netplan/30-wificfg.yaml
 ```
 :::warning
 
@@ -21,39 +21,25 @@ When you open this file, it will look something like this:
 
 ```yaml
 network:
-    ethernets:
-        usb0:
-            dhcp4: false
-            dhcp6: false
-            link-local:
-            - ipv4
-            match:
-                name: usb0
-            set-name: usb0
     version: 2
     wifis:
         renderer: networkd
         wlan0:
             access-points:
-                MIT:
-                    password: MIT_PASSWORD
-            dhcp4: true
-            optional: true
-```
-
-To add your home WiFi network, add a new `wlan0` interface to WiFis at the bottom of the file:
-
-```yaml
-        wlan0:
-            access-points:
                 HOME_WIFI:
                     password: YOUR_SUPER_SECRET_PASSWORD
+                CAFE_WIFI:
+                    password: THEIR_SUPER_SECRET_PASSWORD
             dhcp4: true
             optional: true
 ```
 
-Change `HOME_WIFI` to the name of your home WiFi network.
+To add your home WiFi network, change `HOME_WIFI` to the name of your home WiFi network.
 Also change `YOUR_SUPER_SECRET_PASSWORD` to your home WiFi network's password.
+
+:::note
+You can add multiple WiFi networks to this file, so if you have a cafe WiFi network, you can add it as well.
+:::
 
 :::danger
 
