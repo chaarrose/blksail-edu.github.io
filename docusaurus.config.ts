@@ -59,7 +59,7 @@ const config: Config = {
           lastVersion: "current",
           versions: {
             current: {
-              label: "2026-alpha",
+              label: "2026",
               path: "",
             },
           },

@@ -8,7 +8,7 @@ sidebar_position: 1
 
 <iframe src="https://blksail-edu.github.io/slides/2026_day0" width="100%" height={320} frameborder="0" allowfullscreen></iframe>
 
-Welcome to the Autonomous Underwater Vehicle Challenge (AUVC) 2025!
+Welcome to the Autonomous Underwater Vehicle Challenge (AUVC) 2026!
 This comprehensive and practical course is designed to introduce you to the fascinating world of underwater robotics, equipping you with the skills and knowledge to program and operate off-the-shelf underwater robotic vehicles.
 
 ## Course Overview
@@ -17,7 +17,7 @@ Over the next four weeks, you will:
 
 - Understand the fundamentals of underwater robotics and its applications.
 - Learn the principles of buoyancy, propulsion, and navigation in marine environments.
-- Get acquainted with Python and C++ programming languages and how to use them in controlling underwater robots.
+- Get acquainted with Python and how to use it in controlling underwater robots.
 - Gain hands-on experience in programming and operating off-the-shelf underwater robotic vehicles.
 - Learn to process sensor data, develop control algorithms, and understand communication protocols for underwater systems.
 - Understand the steps involved in mission planning and execution for underwater robots.
@@ -29,7 +29,7 @@ Over the next four weeks, you will:
 Throughout the course, you will be provided with a variety of resources to facilitate your learning:
 
 - Comprehensive course material, including lecture slides, readings, and exercises.
-- Access to Python and C++ programming tools and relevant software libraries.
+- Access to Python programming tools and relevant software libraries.
 - Hands-on experience with off-the-shelf underwater robotic vehicles.
 - Guest lectures from industry professionals.
 - Continuous support and guidance from our expert instructors.
