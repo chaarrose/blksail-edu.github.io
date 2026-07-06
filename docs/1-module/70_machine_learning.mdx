@@ -4,6 +4,573 @@ sidebar_position: 7
 
 # 1.7 Machine Learning
 
-## Introduction
+# Image Classification: Teaching a Computer to See!
+
+*In this workshop, you'll learn how computers recognize images. We'll start with the basic ideas behind AI and machine learning, then train a model to recognize handwritten digits using Python.*
 
 
+## 1. Introduction
+
+### Quick Challenge: Code the rule for "this is a cat"
+
+Imagine you had to write rules for detecting a cat.
+What rules would you use?
+
+- Pointy ears?
+- Whiskers?
+- Fur?
+- Four legs?
+
+Now think about:
+- What if the cat is sleeping?
+- What if only its face is visible?
+- What if it's wearing a costume?
+
+Suddenly the problem gets much harder.
+
+This is exactly the wall that traditional programming hits. We can't hand write a rule for "catness." So instead of writing the rule ourselves, **we let the computer find the rule by looking at lots of examples.** That shift from programming rules to learning from examples is the whole idea behind AI and machine learning.
+
+ 
+### What is AI, really?
+ 
+AI is a broad term for computer systems that can perform tasks that normally require human intelligence. You already use it constantly:
+ 
+- **Face ID** unlocking your phone
+- **Autocorrect / autocomplete** guessing your next word
+- **Photo filters** that find your face 
+- **Spam filters** that identify suspicious or unwanted messages
+ 
+ 
+## 2. The Machine Learning Pipeline
+
+### The big picture: how a model actually gets made
+
+Before we dive into vocabulary, here's the full journey every machine learning (ML) project goes through, start to finish:
+
+<div align="center">
+![A flowchart showing the machine learning workflow: Data Gathering → Data Preprocessing → Model Training → Model Evaluation → Model Fine-Tuning → Model Deployment](https://github.com/AlchaarAiya/Customers-Service-Robot-UML-Diagrams/blob/a2b6b5e77ca06cec0906cfcd108531d61a3e62a4/ML_Workflow.png?raw=true) 
+*Figure 1: Machine Learning Workflow Overview [^1]*
+</div>
+
+A quick translation of each step:
+- **Data Gathering**: collecting the raw examples (photos, text, numbers...)
+- **Data Preprocessing**: cleaning and organizing that data so a model can actually use it
+- **Model Training**: showing the model labeled examples so it can learn
+- **Model Evaluation**: checking how well it actually learned
+- **Model Fine-Tuning**: adjusting the model and training settings to improve performance 
+- **Model Deploymnet**: putting the trained model into a real application so people can use it
+
+
+### We don't program rules, we give examples
+
+The core idea of ML in one sentence:
+
+> Instead of writing the rules, we show the model thousands of labeled examples, and it learns the patterns and rules on its own.
+
+### Supervised vs. unsupervised learning
+
+Before we go further, there are two big "modes" of learning worth knowing:
+
+- **Supervised learning = learning with an answer key.** We show the model labeled examples ("this is a cat," "this is a dog") and it learns to map inputs to the correct labels. *"This is what we're doing today."*
+- **Unsupervised learning = finding patterns without an answer key.** For example: grouping a pile of photos into clusters of "similar" images, without ever being told what the categories are.
+
+<div align="center">
+![Supervised vs Unsupervised Example](https://github.com/AlchaarAiya/Customers-Service-Robot-UML-Diagrams/blob/main/supervised%20vs%20unsupervise.png?raw=true)
+*Figure 2: Comparison of Supervsied vs Unsupervised Learning [^2]*
+</div>
+
+### Labels and Features 
+
+Every example we give the model has two parts: the **clues** it looks at, and the **answer** it's trying to predict. Those are called features and labels.
+
+- **Features = the clues the model uses to decide**. A feature is any piece of information the model uses to make its decision. For an image, that might be edges, colors, shapes, or textures.
+- **Labels = the answer key**. A label is the correct answer attached to each piece of data. If we're teaching a model to recognize fruits, the label for a photo of an apple is simply: `apple`. Without labels, the model has no way to check whether it's right or wrong! Labels are what make learning possible.
+
+
+#### Try It Yourself: Spot the Label
+
+Take a look at this table of weather data: Four columns are the clues (features), and one column is the answer we want to predict (label). Which one is the label? 
+
+
+| Temperature | Humidity | Windy? | Dark Clouds? | **Will it Rain?** |
+| ----------- | -------- | ------ | ------------ | ----------------- |
+| 30°C        | 90%      | Yes    | Yes          | Yes               |
+| 22°C        | 35%      | No     | No           | No                |
+| 27°C        | 80%      | Yes    | Yes          | Yes               |
+| 25°C        | 40%      | No     | No           | No                |
+
+<details>
+<summary><strong>Show Answer</strong></summary>
+
+**The label is: "Will it Rain?"**
+
+Here's why:
+- **Label** = the answer the model is trying to predict. In this table, **Will it Rain?** is what we want the model to figure out. It's the outcome we care about.
+- **Features** = the clues the modle uses to make that prediction. **Temperature, Humidity, Windy?,** and **Dark Clouds?** are all pieces of information available before we know the answer. The model reads those and uses them to guess the label.
+
+Notice the pattern too: every time humidity is high and dark clouds are present, it rains. The model's job is to learn exactly that kind of pattern from the examples.
+
+</details>
+
+
+
+### Train / Test Split
+
+We never train and test our model on the same data. Instead, we split our dataset into:
+
+- **Training set**: the examples the model actually learns from
+- **Test set**: examples the model has never seen, used only to check how well it really learned
+
+**Why do we split our dataset?** Imagine studying for an exam by memorizing the answer key to last year's test. You'd ace that one test, but you wouldn't have actually learned the subject, a new test would expose you immediately. Models have the same risk: if we test them on data they already memorized during training, we have no way of knowing if they actually learned the pattern, or just memorized the answers. The test set is what keeps us honest.
+
+During **training**, the model gets to see the image and the label together, so it can learn the connection. During **testing**, it only sees the image, then it has to guess, and finally we check that guess against the real label.
+
+:::danger
+
+If you train and test on the **same data**, your accuracy will look unrealistically high. The model has already seen the answers, so it's not actually being tested. This is one of the most common mistakes in ML, and it gives you a false sense of how well your model really works.
+
+:::
+ 
+## 3. Two Kinds of "Vision" Tasks
+ 
+- **Classification**: *"What is in this image?"* One label for the whole picture.
+- **Detection**: *"Where is it?"* Draws a bounding box around each object it finds, plus a label for each box.
+
+<div align="center">
+![Classification vs Detection Example](https://github.com/AlchaarAiya/Customers-Service-Robot-UML-Diagrams/blob/main/class_detec_seg.png?raw=true)
+*Figure 3: Classification vs Detection vs Segmentation [^3] [^4] [^5]*
+</div>
+
+There's a third task worth mentioning: **segmentation** goes a step further than a bounding box. Instead of drawing a rough rectangle around an object, it traces its exact outline, pixel by pixel. We won't be building this today, but it's good to know it exists! It's what shows up in things like self-driving car vision systems or medical scan analysis.
+ 
+
+## 4. Hands-On: Train a Model Without Writing Any Code
+ 
+Before we write a single line of Python, let's get a feel for what "training" actually *feels* like.
+ 
+**[Teachable Machine](https://teachablemachine.withgoogle.com/train/image)**: train a live image classifier using your webcam with zero code.
+ 
+Try this:
+1. Create two or three classes (e.g., "thumbs up" vs. "thumbs down" vs. "nothing")
+2. Show your webcam several examples of each
+3. Hit train, then test it live
+
+What you just did is the ML pipeline from Section 2. You provided labeled examples (this pose = "thumbs up"), the model learned a pattern, and now it predicts on new images it's never seen.
+
+
+## 5. Neural Networks & CNNs
+ 
+### Neural Networks Intuition
+
+Think of a neural network as a team solving a puzzle together. Each person notices something different and passes their observations to the next teammate. By the time the information reaches the end of the team, they have enough clues to make a good decision.
+
+Imagine we're trying to recognize a cat:
+- The first layers might notice simple things like edges and lines.
+- The middle layers might combine those into shapes like ears, eyes, or whiskers.
+- The final layers use all of those clues to decide, "This is a cat."
+ 
+<div align="center">
+![A layered neural network with an input layer, two hidden layers, and an output layer, shown as columns of colored circles connected by lines](https://upload.wikimedia.org/wikipedia/commons/d/d2/Neural_network_explain.png)
+*Figure 4: Artificial Neural Network Architecture [^6]*
+</div>
+
+### Convolutional Neural Networks (CNNs)
+ 
+CNNs are neural networks built specifically for images. Two ideas carry almost the whole concept:
+ 
+- **Filters** are like little stamps that slide across the image, each one searching for one specific pattern like an edge, a curve, a patch of texture. A single filter doesn't know what a "cat" is, it just lights up wherever it spots its one pattern.
+- **Pooling** "zooms out" it shrinks the image down while keeping the strongest signals, which speeds things up and helps the model focus on what matters instead of exact pixel positions.
+<div align="center">
+![A typical CNN architecture: an input image passed through alternating convolution and pooling layers, getting progressively smaller and deeper, ending in fully connected layers and an output](https://commons.wikimedia.org/wiki/Special:FilePath/Typical_cnn.png)
+*Figure 5: Convolutional Neural Network Architecture [^7]*
+</div>
+ 
+<div align="center"> 
+![A diagram of max pooling: a larger grid of numbers is reduced to a smaller grid by keeping only the maximum value from each region](https://commons.wikimedia.org/wiki/Special:FilePath/Convolutional_neural_network,_maxpooling.png)
+*Figure 6: Max Pooling in CNNs [^8]*
+</div>
+
+
+Stack enough of these layers, and something interesting happens:
+ 
+```
+Layer 1: finds edges
+Layer 2: combines edges into shapes (curves, corners)
+Layer 3: combines shapes into parts (an eye, an ear)
+Deeper layers: combine parts into the full object ("cat")
+```
+  
+## 6. Reading Model Performance
+ 
+A couple of terms you'll see pop up in the notebook:
+ 
+- **Accuracy**: the percentage of predictions the model got right. Easy for humans to read.
+- **Loss**: a number representing "how wrong" the model's predictions were. Training is the process of making this number smaller. 
+- **Hyperparameters**: settings we choose before training starts (not learned by the model itself), like how many times it studies the full dataset (`epochs`) or how many images it looks at before updating itself (`batch_size`). Changing these can meaningfully change how well or how fast a model learns.
+- **Overfitting**: when a model starts memorizing the training data instead of learning the general pattern. The giveaway: training accuracy keeps climbing while validation accuracy stalls or drops. 
+
+ 
+## 7. Live Coding: Classification in Python
+ 
+We'll be using the **MNIST dataset**[^9] which contains 70,000 small images of handwritten digits (0–9), each one labeled with the correct digit. This section is here to explain what each piece is doing and why.
+ 
+<div align="center"> 
+![A grid of sample handwritten digit images from the MNIST dataset, showing many different handwriting styles for the digits 0 through 9](https://commons.wikimedia.org/wiki/Special:FilePath/MnistExamples.png)\
+*Figure 7: Sample handwritten digit images from the MNIST dataset [^10]*
+</div>
+
+**Why we're using [Google Colab:](https://colab.research.google.com/)** Training a neural network needs a decent amount of computing power, more than most laptops comfortably have on tap. Colab gives us a free notebook in the browser, with a free GPU attached, so the training that would take forever on a regular laptop runs quickly instead. 
+
+:::tip
+
+> Before running any code, make sure to enable GPU acceleration for faster training. In Colab, go to:\
+> **Runtime → Change runtime type → Hardware accelerator → GPU → Save**
+
+:::
+
+### Step 1: Import the libraries
+
+Before we build our model, we need to import a few Python libraries.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
+import gradio as gr
+
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+```
+
+### Step 2: Load the dataset
+
+Keras gives us MNIST already split into training and test sets:
+ 
+```python
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+```
+:::info
+
+When working with machine learning datasets, you'll often see the variables `X` and `y`.
+- **`X`** contains the **features** (the input data the model learns from).
+- **`y`** contains the **labels** (the correct answers).
+
+:::
+
+### Step 3: Take a look at the data
+
+Before doing any processing, let's actually see what the images look like.
+
+```python
+plt.figure(figsize=(9, 3))
+
+for digit in range(10):
+    idx = np.where(y_train == digit)[0][0]
+
+    plt.subplot(2, 5, digit + 1)
+    plt.imshow(X_train[idx], cmap='gray')
+    plt.title(f"Digit {digit}")
+    plt.axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+ 
+### Step 4: Prepare the images for the model 
+
+We'll do two things here:
+
+- **Reshape** the images so the model understands they are grayscale images (1 channel)
+- **Normalize** pixel values from 0–255 down to 0–1 so training is more stable and faster
+ 
+```python
+X_train = X_train.reshape(X_train.shape[0], IMG_SIZE, IMG_SIZE, 1)
+X_test = X_test.reshape(X_test.shape[0], IMG_SIZE, IMG_SIZE, 1)
+
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+```
+ 
+### Step 5: Build the CNN
+
+Now we build the model by stacking layers in two convolution blocks, followed by decision-making layers:
+
+- **First convolution block**
+  - [Conv2D](https://keras.io/api/layers/convolution_layers/convolution2d/) layer: 32 filters, size 3×3, relu activation
+  - [Conv2D](https://keras.io/api/layers/convolution_layers/convolution2d/) layer: 32 filters, size 3×3, relu activation
+  - [MaxPooling2D](https://keras.io/api/layers/pooling_layers/max_pooling2d/) layer: pool size 2×2
+- **Second convolution block**
+  - [Conv2D](https://keras.io/api/layers/convolution_layers/convolution2d/) layer: 64 filters, size 3×3, relu activation
+  - [Conv2D](https://keras.io/api/layers/convolution_layers/convolution2d/) layer: 64 filters, size 3×3, relu activation
+  - [MaxPooling2D](https://keras.io/api/layers/pooling_layers/max_pooling2d/) layer: pool size 2×2
+- **Decision-making layers**
+  - [Flatten](https://keras.io/api/layers/reshaping_layers/flatten/) layer
+  - [Dense](https://keras.io/api/layers/core_layers/dense/) layer: 128 units, relu activation
+  - [Dropout](https://keras.io/api/layers/regularization_layers/dropout/) layer: rate 0.5
+  - [Dense](https://keras.io/api/layers/core_layers/dense/) (output) layer: 10 units, softmax activation
+
+```python
+# building the model
+
+model = Sequential()
+model.add(Input(shape=(IMG_SIZE, IMG_SIZE, 1)))
+
+# first convolution block: looks for simple patterns like edges
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+# second convolution block: combines simple patterns into more complex shapes
+model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+# flatten and make the final decision
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(NUM_CLASSES, activation='softmax'))
+```
+ 
+:::warning note
+
+The final Dense layer has one neuron per class (10 digits = 10 neurons), where each neuron represents one possible output.
+
+:::
+
+:::info
+
+> You can explore all available Keras layers [here](https://keras.io/api/layers/).
+
+:::
+
+Let’s look at our model. We can print a summary of the model we just built:
+
+```python
+model.summary()
+```
+
+### Step 6: Compile and train the model 
+ 
+Now we tell the model how to learn, and then we start training it. We also set a few important hyperparameters (training settings):
+
+- **optimizer (`adam`)**: how the model improves after each mistake  
+- **loss function**: how we measure how wrong the model is  
+- **metrics (`accuracy`)**: how we track performance during training  
+- **epochs**: how many times the model sees the full dataset  
+- **batch size**: how many images it looks at before updating itself  
+- **validation split**: a small part of the data used to check how well the model generalizes
+
+```python
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+ 
+history = model.fit(
+    X_train, y_train,
+    batch_size=BATCH_SIZE,
+    epochs=EPOCHS,
+    validation_split=0.2
+)
+```
+ 
+### Step 7: Visualize the training progress
+
+As the model trains, Keras records how its **accuracy** and **loss** change after each epoch.
+
+Plotting these values helps us see whether the model is learning and whether it might be overfitting.
+
+```python
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Accuracy over epochs')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='lower right')
+plt.show()
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Loss over epochs')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper right')
+plt.show()
+```
+
+Ideally, we want to see:
+- **Accuracy increasing**
+- **Loss decreasing**
+- **Training and validation curves staying relatively close together**
+
+### Step 8: Evaluate on the test set
+
+Now comes the real moment of truth!
+
+So far, we've monitored the model during training using the validation data. Now we'll evaluate it on the **test set**, images the model has never seen before.
+
+```python
+score = model.evaluate(X_test, y_test, verbose=0)
+print("Test accuracy:", score[1])
+```
+
+
+### Draw your own digit!
+ 
+Now comes the fun part! Draw a digit and see if the model can recognize your handwriting.
+ 
+```python
+def preprocess(img):
+    img = img["composite"]          # pull the actual drawing out of the canvas data
+    img = cv2.resize(img, (28, 28))
+    img = 255 - img                 # invert: black-on-white -> white-on-black, like MNIST Dataset
+    img = img / 255.0
+    img = img.reshape(1, 28, 28, 1)
+    return img
+
+def predict_digit(img):
+    if img is None or img["composite"] is None:
+        return {}
+    processed = preprocess(img)
+    pred = model.predict(processed)
+    return {str(i): float(pred[0][i]) for i in range(10)}
+
+interface = gr.Interface(
+    fn=predict_digit,
+    inputs=gr.Sketchpad(image_mode="L", brush=gr.Brush(colors=["#000000"], color_mode="fixed")),
+    outputs=gr.Label(num_top_classes=3),
+    title="MNIST Digit Recognizer",
+    description="Draw a digit (0-9) and see what the model predicts!"
+)
+
+interface.launch(share=True)
+```
+
+### (Optional) Looking at incorrect predictions
+ 
+Even a well-trained model makes mistakes. Let's look at a few it got wrong. Often you'll notice the true answer is a genuinely messy or ambiguous handwritten digit!
+ 
+```python
+y_pred = model.predict(X_test)
+y_pred_classes = np.argmax(y_pred, axis=1)
+misclassified_idx = np.where(y_pred_classes != y_test)[0]
+print("Number of misclassified:", len(misclassified_idx))
+
+plt.figure(figsize=(10, 10))
+
+for i, idx in enumerate(misclassified_idx[:9]):  # show first 9 mistakes
+    plt.subplot(3, 3, i + 1)
+    plt.imshow(X_test[idx], cmap='gray')
+    plt.title(f"True: {y_test[idx]}\nPred: {y_pred_classes[idx]}")
+    plt.axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+
+## 8. Problem Set
+
+### Problem 1: Build Your Own CNN
+
+Now it's your turn to build a CNN from scratch.
+We'll use a new dataset (More details once finalized). Please load the dataset using this code:
+
+```python
+(X_train, y_train), (X_test, y_test) = 
+
+```
+
+Build a CNN with this architecture
+
+Most of these layers you've already seen. One of them (**BatchNormalization**) is new. You'll need to look up how to use it.
+
+- **First convolution block**
+  - Conv2D layer: 16 filters, size 3×3, relu activation
+  - Conv2D layer: 32 filters, size 3×3, relu activation
+  - MaxPooling2D layer: pool size 2×2
+- **Second convolution block**
+  - Conv2D layer: 64 filters, size 3×3, relu activation
+  - **BatchNormalization layer**
+  - Conv2D layer: 64 filters, size 3×3, relu activation
+  - MaxPooling2D layer: pool size 2×2
+- **Decision-making layers**
+  - Flatten layer
+  - Dense layer: 256 neurons, relu activation
+  - Dense layer: 128 units, relu activation
+  - Dropout layer: rate 0.5
+  - Dense (output) layer: 10 units, softmax activation
+
+
+> 🔍 **New layer:** `BatchNormalization` hasn't been used in the live demo. Read about it here before adding it to your model: [Keras BatchNormalization docs](https://keras.io/api/layers/normalization_layers/batch_normalization/)
+>
+> Quick questions to answer as you read:
+> - What does this layer actually do to the data passing through it?
+> - Does it need you to specify any numbers (like Conv2D needs filter count), or can you add it with no arguments?
+
+### Problem  2: Hyperparameter Experiment
+
+You already built and trained a CNN in Problem Set 1. Now let's find out: **what happens if we change the settings we train it with?** Recall from Section 6, the hyperparameters are settings we choose before training starts, like `epochs` and `batch_size`. They're not learned by the model, but they can dramatically change how well (or badly) it learns.
+
+###### Reuse your model
+
+Use the **same architecture, same dataset, and same dataset-loading code** from Problem Set 1.
+
+#### Run three experiments
+
+Train your model three separate times, changing only what's listed below each time. Keep everything else identical to your Problem Set 1 setup.
+
+- **Run A (baseline)**: `epochs = 5`, `batch_size = 64`, `dropout = 0.5`
+- **Run B (train much longer)**: `epochs = 20`, `batch_size = 64`, `dropout = 0.5`
+- **Run C (train longer, remove dropout)**: `epochs = 20`, `batch_size = 64`, `dropout = 0.0`
+
+After each run, note the final **training accuracy**, **validation accuracy**, and **test accuracy**.
+
+### Record your results
+
+Fill in this table as you go:
+
+| Run | Epochs | Batch Size | Dropout | Final Train Acc | Final Val Acc | Test Acc |
+|-----|--------|------------|---------|------------------|----------------|----------|
+| A   | 5      | 64         | 0.5     |                  |                |          |
+| B   | 20     | 64         | 0.5     |                  |                |          |
+| C   | 20     | 64         | 0.0     |                  |                |          |
+
+
+### Problem 3: Go Collect Your Own Dataset!
+
+Time to step away from the screen, we're going outside!
+
+Your team's mission: walk around MIT campus and collect your own image dataset of squirrels. This dataset will be used in tomorrow's session to train a model.
+
+#### Your goals for this collection trip:
+
+- **Take as many squirrel photos as you can**. Remember, models are data-hungry!
+- **Capture variety**, different angles, distances, lighting conditions, and backgrounds. A model trained only on close-up squirrels might fail on a distant one.
+
+:::important
+
+Keep track of which photos your team took. You'll need to organize them into a folder before tomorrow's session.
+
+:::
+
+:::tip
+
+Did you know? To a computer, the same squirrel photographed from different angles, distances, or lighting conditions counts as completely different images. It has no concept of "same squirrel, different photo." This is actually something we use to our advantage in ML: by taking one image and creating slightly altered copies of it (rotated, flipped, zoomed, brightened), we can artificially grow our dataset. This technique is called **data augmentation**, and the variety in photos you collect today is exactly the same idea, more variety means a stronger, more reliable model!
+
+:::
+---
+
+[^1]: Google Gemini. (2026). Machine Learning Workflow Pipeline Diagram. Generated using the Nano Banana 2 model. 
+[^2]: Google Gemini. (2026). Supervised vs Unsupervised Learning Diagram. Generated using the Nano Banana 2 model.
+[^3]: "Squirrel eating nut" by Josef Steppan — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:MnistExamples.png) — CC-Zero
+[^4]: "Young Squirrels" by Peter Trimming — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Convolutional_neural_network,_maxpooling.png) — CC-BY-SA-2.0
+[^5]: Individual panels were compiled, edited, and combined into a single comparative infographic using Nano Banana.
+[^6]: "Neural network explain" by TseKiChun — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Neural_network_explain.png) — [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
+[^7]: "Typical CNN" by Aphex34 — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Typical_cnn.png) — [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
+[^8]: "Convolutional neural network, maxpooling" by Aphex34 — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Convolutional_neural_network,_maxpooling.png) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0)
+[^9]: LeCun, Y., Cortes, C., & Burges, C. J. (2010). MNIST handwritten digit database. ATT Labs [Online], 2. Available at [MNIST Database Website](https://archive.ics.uci.edu/dataset/683/mnist)
+[^10]: "MnistExamples" by Josef Steppan — [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:MnistExamples.png) — [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
