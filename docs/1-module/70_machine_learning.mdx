@@ -2,7 +2,7 @@
 sidebar_position: 7
 ---
 
-# 1.7 Machine Learning
+# 🧠 Machine Learning
 
 # Image Classification: Teaching a Computer to See!
 
@@ -156,7 +156,6 @@ Try this:
 3. Hit train, then test it live
 
 What you just did is the ML pipeline from Section 2. You provided labeled examples (this pose = "thumbs up"), the model learned a pattern, and now it predicts on new images it's never seen.
-
 
 ## 5. Neural Networks & CNNs
  
@@ -476,15 +475,76 @@ plt.show()
 
 ### Problem 1: Build Your Own CNN
 
-Now it's your turn to build a CNN from scratch.
-We'll use a new dataset (More details once finalized). Please load the dataset using this code:
+You've seen how a CNN learns to recognize handwritten digits, now it's your turn to build one from scratch.
+You'll be working with a [dataset](https://www.kaggle.com/datasets/shahidulugvcse/national-flowers) of 9 types of flowers: **Tulip, Sunflower, Rose, Orchid, Lotus, Lily, Lavender, Dandelion, Daisy**
+
+Unlike MNIST digits which are all small, centered, grayscale images, these are real-world color photos with varying backgrounds, lighting, and angles. That makes this a harder and more realistic classification challenge!
+Your task: build a CNN that can look at a flower photo and correctly identify which of the 9 types it is.
+
+Please load the dataset using this code:
+
 
 ```python
-(X_train, y_train), (X_test, y_test) = 
+import kagglehub
+import os
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+IMG_SIZE = #Set your input size
+BATCH_SIZE = #Set your batch size 
+
+# Download the dataset 
+path = kagglehub.dataset_download("shahidulugvcse/national-flowers")
+print("Path to dataset files:", path)
+
+flower_train = os.path.join(path, "flowerdataset/train/")
+flower_test = os.path.join(path, "flowerdataset/test/")  
+
+#Train Dataset 
+train_gen = ImageDataGenerator(
+    validation_split = 0.2,
+    rescale = 1.0 / 255.0,
+    width_shift_range = 0.2,
+    height_shift_range = 0.2,
+    horizontal_flip = True,
+)
+train_ds = train_gen.flow_from_directory(
+    directory = flower_train,
+    target_size = (IMG_SIZE, IMG_SIZE),
+    batch_size = BATCH_SIZE,
+    class_mode = 'sparse',
+    shuffle = True,
+    subset = 'training',
+    seed = 42
+)
+
+#Validation Dataset
+valid_ds = train_gen.flow_from_directory(
+    directory = flower_train,
+    target_size = (IMG_SIZE, IMG_SIZE),
+    batch_size = BATCH_SIZE,
+    class_mode = 'sparse',
+    shuffle = True,
+    subset = 'validation',
+    seed = 42
+)
+
+#Test Dataset 
+test_gen = ImageDataGenerator(rescale = 1.0 / 255.0)
+test_ds = test_gen.flow_from_directory(
+    directory = flower_test,
+    target_size = (IMG_SIZE, IMG_SIZE),
+    batch_size = BATCH_SIZE,
+    class_mode = 'sparse',
+    shuffle = False,
+    seed = 42 
+)
+
+for name, label in test_ds.class_indices.items():
+    print(f"{name.title()}: {label}")    
 ```
 
-Build a CNN with this architecture
+Your task is to implement the following CNN architecture.
 
 Most of these layers you've already seen. One of them (**BatchNormalization**) is new. You'll need to look up how to use it.
 
@@ -502,7 +562,7 @@ Most of these layers you've already seen. One of them (**BatchNormalization**) i
   - Dense layer: 256 neurons, relu activation
   - Dense layer: 128 units, relu activation
   - Dropout layer: rate 0.5
-  - Dense (output) layer: 10 units, softmax activation
+  - Dense (output) layer, softmax activation
 
 
 > 🔍 **New layer:** `BatchNormalization` hasn't been used in the live demo. Read about it here before adding it to your model: [Keras BatchNormalization docs](https://keras.io/api/layers/normalization_layers/batch_normalization/)
@@ -510,6 +570,29 @@ Most of these layers you've already seen. One of them (**BatchNormalization**) i
 > Quick questions to answer as you read:
 > - What does this layer actually do to the data passing through it?
 > - Does it need you to specify any numbers (like Conv2D needs filter count), or can you add it with no arguments?
+
+
+:::tip
+It's always a good idea to inspect your dataset before training a model. You can display a few sample images using the following code:
+
+```python
+import matplotlib.pyplot as plt
+
+images, labels = next(valid_ds)
+class_names = {v: k for k, v in valid_ds.class_indices.items()}
+
+plt.figure(figsize=(12, 9))
+
+for i in range(12):
+    plt.subplot(3, 4, i + 1)
+    plt.imshow(images[i])
+    plt.title(class_names[int(labels[i])].title())
+    plt.axis("off")
+
+plt.tight_layout()
+plt.show()
+```
+:::
 
 ### Problem  2: Hyperparameter Experiment
 
@@ -523,9 +606,10 @@ Use the **same architecture, same dataset, and same dataset-loading code** from 
 
 Train your model three separate times, changing only what's listed below each time. Keep everything else identical to your Problem Set 1 setup.
 
-- **Run A (baseline)**: `epochs = 5`, `batch_size = 64`, `dropout = 0.5`
-- **Run B (train much longer)**: `epochs = 20`, `batch_size = 64`, `dropout = 0.5`
-- **Run C (train longer, remove dropout)**: `epochs = 20`, `batch_size = 64`, `dropout = 0.0`
+- **Run A (baseline)**: `epochs = 5`, `batch_size = 32`, `dropout = 0.5`
+- **Run B (train longer)**: `epochs = 20`, `batch_size = 32`, `dropout = 0.5`
+- **Run C (train much longer, reduce dropout)**: `epochs = 30`, `batch_size = 32`, `dropout = 0.3`
+- **Run D** (Pick your own experiment parameters!)
 
 After each run, note the final **training accuracy**, **validation accuracy**, and **test accuracy**.
 
@@ -535,9 +619,10 @@ Fill in this table as you go:
 
 | Run | Epochs | Batch Size | Dropout | Final Train Acc | Final Val Acc | Test Acc |
 |-----|--------|------------|---------|------------------|----------------|----------|
-| A   | 5      | 64         | 0.5     |                  |                |          |
-| B   | 20     | 64         | 0.5     |                  |                |          |
-| C   | 20     | 64         | 0.0     |                  |                |          |
+| A   | 5      | 32         | 0.5     |                  |                |          |
+| B   | 20     | 32         | 0.5     |                  |                |          |
+| C   | 50     | 32         | 0.3     |                  |                |          |
+| D   |        |            |         |                  |                |          |
 
 
 ### Problem 3: Go Collect Your Own Dataset!
