@@ -242,23 +242,20 @@ To check if you have Python 3 installed, run:
 python3 --version
 ```
 
-### Pip
+### Virtual Environments, Virtualenvwrapper, and Pip
 
-[Pip](https://pypi.org/project/pip/) is the package manager for Python.
+Virtual environments are a way to create isolated Python environments for different Python projects.
+In this course, we will be using [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/) to manage our virtual environments.
 
-To check if you have Pip installed, run:
-
-```bash
-pip3 --version
-```
-
-If you don't have Pip installed, you can install it by running:
+[Pip](https://pypi.org/project/pip/) is a package manager for Python packages, or modules if you like.
+So let's install `pip` and `virtualenvwrapper` using the OS package manager.
 
 <Tabs groupId="operating-systems">
 <TabItem value="macos" label="macOS">
 
 ```bash
-brew install pip
+brew install pip  # this will install pip
+pip install --user virtualenv virtualenvwrapper
 ```
 
 </TabItem>
@@ -266,26 +263,22 @@ brew install pip
 
 ```bash
 sudo apt install python3-pip
+sudo apt install python3-virtualenv python3-virtualenvwrapper
 ```
+
+:::note
+Note that we are using `apt` to install `pip` and `virtualenvwrapper` on Ubuntu.
+That is because Ubuntu manages its own Python packages and we don't want to interfere with that.
+
+We can update `pip` and `virtualenvwrapper` using `pip` after installing them with `apt`.
+
+```sh
+pip3 install --user --upgrade pip virtualenv virtualenvwrapper
+```
+:::
 
 </TabItem>
 </Tabs>
-
-### Virtual Environments
-
-To avoid conflicts between different Python projects, it is a good idea to use
-virtual environments. A virtual environment is a directory tree which contains
-Python executable files and other files which indicate that it is a virtual
-environment.
-
-#### Install
-
-Let's install the `virtualenv` package and `virtualenvwrapper` extension for
-Python.
-
-```bash
-pip3 install --user virtualenv virtualenvwrapper
-```
 
 #### `.zshrc`
 
@@ -293,31 +286,19 @@ We will be adding some configuration to the `.zshrc` file.
 
 Open the `.zshrc` file using your preferred text editor.
 
-:::note
+```sh
+code ~/.zshrc
+```
 
-If this is your first time editing the file, you have a couple of options:
-
-* **Nano:** Nano is the default terminal-based text editor. Open the file by running:
-
-  ```bash
-  nano ~/.zshrc
-  ```
-
-  After making your changes, press **Ctrl + O** to save, **Enter** to confirm, and **Ctrl + X** to exit.
-
-* **Visual Studio Code:** If you have Visual Studio Code installed and the `code` command is available from your terminal, you can open the file with:
-
-  ```sh
-  code ~/.zshrc
-  ```
-
-  :::note
-  If the `code` command is not recognized in your terminal, you can enable it by opening Visual Studio Code, pressing **Cmd + Shift + P** (on macOS) or **Ctrl + Shift + P** (on Windows/Linux), typing `Shell Command: Install 'code' command in PATH`, and pressing **Enter**.
+:::tip
+If the `code` command is not recognized in your terminal, you can enable it by opening Visual Studio Code, pressing **Cmd + Shift + P** (on macOS) or **Ctrl + Shift + P** (on Windows/Linux), typing `Shell Command: Install 'code' command in PATH`, and pressing **Enter**.
 :::
 
 
 Once the `.zshrc` file is open, add the following lines at the end:
 
+<Tabs groupId="operating-systems">
+<TabItem value="macos" label="macOS">
 ```bash
 # Python
 export WORKON_HOME=$HOME/.virtualenvs
@@ -325,6 +306,18 @@ export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 export PATH=$PATH:$HOME/.local/bin
 source virtualenvwrapper.sh
 ```
+</TabItem>
+<TabItem value="ubuntu" label="Ubuntu">
+```bash
+# Python
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+export PATH=$PATH:$HOME/.local/bin
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+```
+</TabItem>
+</Tabs>
+
 
 ## Assigning a Static IP for your Local Machine to connect to the Raspberry Pi
 
