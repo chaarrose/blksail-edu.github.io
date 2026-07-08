@@ -114,11 +114,53 @@ Matrix product is a bit more complex than addition, subtraction, and scalar mult
 The product of two matrices $\mathbf{A}$ and $\mathbf{B}$ is given by:
 
 $$
-\begin{aligned}
-\mathbf{A} \mathbf{B} &= \begin{bmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{bmatrix} \begin{bmatrix} b_{11} & b_{12} & \cdots & b_{1p} \\ b_{21} & b_{22} & \cdots & b_{2p} \\ \vdots & \vdots & \ddots & \vdots \\ b_{n1} & b_{n2} & \cdots & b_{np} \end{bmatrix} \\
-= \begin{bmatrix} a_{11} b_{11} + a_{12} b_{21} + \cdots + a_{1n} b_{n1} & a_{11} b_{12} + a_{12} b_{22} + \cdots + a_{1n} b_{n2} & \cdots & a_{11} b_{1p} + a_{12} b_{2p} + \cdots + a_{1n} b_{np} \\ a_{21} b_{11} + a_{22} b_{21} + \cdots + a_{2n} b_{n1} & a_{21} b_{12} + a_{22} b_{22} + \cdots + a_{2n} b_{n2} & \cdots & a_{21} b_{1p} + a_{22} b_{2p} + \cdots + a_{2n} b_{np} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} b_{11} + a_{m2} b_{21} + \cdots + a_{mn} b_{n1} & a_{m1} b_{12} + a_{m2} b_{22} + \cdots + a_{mn} b_{n2} & \cdots & a_{m1} b_{1p} + a_{m2} b_{2p} + \cdots + a_{mn} b_{np} \end{bmatrix}
-\end{aligned}
+\mathbf{A}\mathbf{B}
+=
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n}\\
+a_{21} & a_{22} & \cdots & a_{2n}\\
+\vdots & \vdots & \ddots & \vdots\\
+a_{m1} & a_{m2} & \cdots & a_{mn}
+\end{bmatrix}
+\begin{bmatrix}
+b_{11} & b_{12} & \cdots & b_{1p}\\
+b_{21} & b_{22} & \cdots & b_{2p}\\
+\vdots & \vdots & \ddots & \vdots\\
+b_{n1} & b_{n2} & \cdots & b_{np}
+\end{bmatrix}
 $$
+
+$$
+=
+\begin{bmatrix}
+a_{11}b_{11}+a_{12}b_{21}+\cdots+a_{1n}b_{n1}
+&
+a_{11}b_{12}+a_{12}b_{22}+\cdots+a_{1n}b_{n2}
+&
+\cdots
+&
+a_{11}b_{1p}+a_{12}b_{2p}+\cdots+a_{1n}b_{np}
+\\
+a_{21}b_{11}+a_{22}b_{21}+\cdots+a_{2n}b_{n1}
+&
+a_{21}b_{12}+a_{22}b_{22}+\cdots+a_{2n}b_{n2}
+&
+\cdots
+&
+a_{21}b_{1p}+a_{22}b_{2p}+\cdots+a_{2n}b_{np}
+\\
+\vdots & \vdots & \ddots & \vdots\\
+a_{m1}b_{11}+a_{m2}b_{21}+\cdots+a_{mn}b_{n1}
+&
+a_{m1}b_{12}+a_{m2}b_{22}+\cdots+a_{mn}b_{n2}
+&
+\cdots
+&
+a_{m1}b_{1p}+a_{m2}b_{2p}+\cdots+a_{mn}b_{np}
+\end{bmatrix}
+$$
+
+
 
 The product of two matrices $\mathbf{A}$ and $\mathbf{B}$ is a matrix with the number of rows equal to the number of rows in the first matrix and the number of columns equal to the number of columns in the second matrix.
 i.e., if $\mathbf{A}$ is an $m \times n$ matrix and $\mathbf{B}$ is an $n \times p$ matrix, then the product $\mathbf{A} \mathbf{B}$ is an $m \times p$ matrix.
