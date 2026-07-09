@@ -2,14 +2,11 @@
 sidebar_position: 7
 ---
 
-# 🧠 Machine Learning
+# 🧠 1.7 Machine Learning
 
-# Image Classification: Teaching a Computer to See!
+Computers don't see the world the way we do, they have to learn from examples. In this session, we will explore how image classification teaches computers to recognize what is in a picture, then train your own model to identify handwritten digits using Python.
 
-*In this workshop, you'll learn how computers recognize images. We'll start with the basic ideas behind AI and machine learning, then train a model to recognize handwritten digits using Python.*
-
-
-## 1. Introduction
+## Introduction
 
 ### Quick Challenge: Code the rule for "this is a cat"
 
@@ -41,7 +38,7 @@ AI is a broad term for computer systems that can perform tasks that normally req
 - **Spam filters** that identify suspicious or unwanted messages
  
  
-## 2. The Machine Learning Pipeline
+## The Machine Learning Pipeline
 
 ### The big picture: how a model actually gets made
 
@@ -131,7 +128,7 @@ If you train and test on the **same data**, your accuracy will look unrealistica
 
 :::
  
-## 3. Two Kinds of "Vision" Tasks
+## Two Kinds of "Vision" Tasks
  
 - **Classification**: *"What is in this image?"* One label for the whole picture.
 - **Detection**: *"Where is it?"* Draws a bounding box around each object it finds, plus a label for each box.
@@ -144,7 +141,7 @@ If you train and test on the **same data**, your accuracy will look unrealistica
 There's a third task worth mentioning: **segmentation** goes a step further than a bounding box. Instead of drawing a rough rectangle around an object, it traces its exact outline, pixel by pixel. We won't be building this today, but it's good to know it exists! It's what shows up in things like self-driving car vision systems or medical scan analysis.
  
 
-## 4. Hands-On: Train a Model Without Writing Any Code
+## Hands-On: Train a Model Without Writing Any Code
  
 Before we write a single line of Python, let's get a feel for what "training" actually *feels* like.
  
@@ -157,7 +154,7 @@ Try this:
 
 What you just did is the ML pipeline from Section 2. You provided labeled examples (this pose = "thumbs up"), the model learned a pattern, and now it predicts on new images it's never seen.
 
-## 5. Neural Networks & CNNs
+## Neural Networks & CNNs
  
 ### Neural Networks Intuition
 
@@ -199,7 +196,7 @@ Layer 3: combines shapes into parts (an eye, an ear)
 Deeper layers: combine parts into the full object ("cat")
 ```
   
-## 6. Reading Model Performance
+## Reading Model Performance
  
 A couple of terms you'll see pop up in the notebook:
  
@@ -209,7 +206,7 @@ A couple of terms you'll see pop up in the notebook:
 - **Overfitting**: when a model starts memorizing the training data instead of learning the general pattern. The giveaway: training accuracy keeps climbing while validation accuracy stalls or drops. 
 
  
-## 7. Live Coding: Classification in Python
+## Live Coding: Classification in Python
  
 We'll be using the **MNIST dataset**[^9] which contains 70,000 small images of handwritten digits (0–9), each one labeled with the correct digit. This section is here to explain what each piece is doing and why.
  
@@ -222,8 +219,8 @@ We'll be using the **MNIST dataset**[^9] which contains 70,000 small images of h
 
 :::tip
 
-> Before running any code, make sure to enable GPU acceleration for faster training. In Colab, go to:\
-> **Runtime → Change runtime type → Hardware accelerator → GPU → Save**
+Before running any code, make sure to enable GPU acceleration for faster training. In Colab, go to:\
+**Runtime → Change runtime type → Hardware accelerator → GPU → Save**
 
 :::
 
@@ -340,7 +337,7 @@ The final Dense layer has one neuron per class (10 digits = 10 neurons), where e
 
 :::info
 
-> You can explore all available Keras layers [here](https://keras.io/api/layers/).
+You can explore all available Keras layers [here](https://keras.io/api/layers/).
 
 :::
 
@@ -471,7 +468,7 @@ plt.show()
 ```
 
 
-## 8. Problem Set
+## Problem Set
 
 ### Problem 1: Build Your Own CNN
 
